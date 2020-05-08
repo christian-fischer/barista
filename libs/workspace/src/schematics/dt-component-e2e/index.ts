@@ -16,6 +16,7 @@
 
 import { DtComponentE2EOptions } from './schema';
 import { strings } from '@angular-devkit/core';
+import { join } from 'path';
 import {
   Rule,
   Tree,
@@ -25,6 +26,22 @@ import {
   template,
   mergeWith,
 } from '@angular-devkit/schematics';
+import * as ts from 'typescript';
+import { getSourceFile, findNodes, getIndentation } from '../utils/ast-utils';
+import { InsertChange, commitChanges } from '../utils/change';
+
+interface DtE2EExtendedOptions {
+  selector: string;
+  componentModule: {
+    name: string;
+    package: string;
+  };
+  e2eComponent: {
+    component: string;
+    module: string;
+  };
+  name: string;
+}
 
 function generateComponentOptions(
   name: string,
@@ -44,11 +61,56 @@ function generateE2EComponentOptions(
   };
 }
 
+/**
+ * Adds a new route inside the ui-test routes
+ */
+function addRoute(options: DtE2EExtendedOptions): Rule {
+  return (host: Tree) => {
+    const modulePath = join(
+      'apps',
+      'components-e2e',
+      'src',
+      'app',
+      'app.routing.module.ts',
+    );
+    const sourceFile = getSourceFile(host, modulePath);
+
+    /**
+     * find last route and add new route
+     */
+    const routesDeclaration = findNodes(
+      sourceFile,
+      ts.SyntaxKind.VariableDeclaration,
+    ).find(
+      (node: ts.VariableDeclaration) => node.name.getText() === 'routes',
+    ) as ts.VariableDeclaration;
+    const routesElements = (routesDeclaration.initializer as ts.ArrayLiteralExpression)
+      .elements;
+    const lastElement = routesElements[routesElements.length - 1];
+    const end = routesElements.hasTrailingComma
+      ? lastElement.getEnd() + 1
+      : lastElement.getEnd();
+    const indentation = getIndentation(routesElements);
+    const toInsert = `${indentation}{
+    path: '${strings.dasherize(options.name)}',
+    loadChildren: () =>
+      import('../components/${strings.dasherize(
+        options.name,
+      )}/${strings.dasherize(options.name)}.module').then(
+        (module) => module.${options.e2eComponent.module},
+      ),
+  },`;
+    const routesChange = new InsertChange(modulePath, end, toInsert);
+
+    return commitChanges(host, [routesChange], modulePath);
+  };
+}
+
 // TODO: extract reusable naming functions and move to utils
 
 export default function (options: DtComponentE2EOptions): Rule {
   return async (_host: Tree) => {
-    const extendedOptions = {
+    const extendedOptions: DtE2EExtendedOptions = {
       ...options,
       selector: `dt-${strings.dasherize(options.name)}`,
       componentModule: generateComponentOptions(options.name),
@@ -64,6 +126,6 @@ export default function (options: DtComponentE2EOptions): Rule {
       }),
     ]);
 
-    return chain([mergeWith(templateSource)]);
+    return chain([mergeWith(templateSource), addRoute(extendedOptions)]);
   };
 }
