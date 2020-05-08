@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-export interface DtComponentE2EOptions {
-  name: string;
-}
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { Route, RouterModule } from '@angular/router';
+import { <%= componentModule.name %> } from '<%= componentModule.package %>';
+import { <%= e2eComponent.component %> } from './<%= dasherize(name) %>';
+
+const routes: Route[] = [{ path: '', component: <%= e2eComponent.component %> }];
+
+@NgModule({
+  declarations: [<%= e2eComponent.component %>],
+  imports: [CommonModule, RouterModule.forChild(routes), <%= componentModule.name %>],
+})
+export class <%= e2eComponent.module %> {}

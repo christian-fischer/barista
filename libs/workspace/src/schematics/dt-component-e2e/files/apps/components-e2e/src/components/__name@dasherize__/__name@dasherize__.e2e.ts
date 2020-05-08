@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-export interface DtComponentE2EOptions {
-  name: string;
-}
+import { <%= camelize(name) %> } from './<%= dasherize(name) %>.po';
+
+fixture('<%= capitalize(name) %>').page('http://localhost:4200/<%= dasherize(name) %>');
+
+test('should ', async (testController: TestController) => {
+  await testController.expect(<%= camelize(name) %>).ok();
+});

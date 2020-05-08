@@ -15,12 +15,55 @@
  */
 
 import { DtComponentE2EOptions } from './schema';
-import { Rule, Tree, chain, noop } from '@angular-devkit/schematics';
+import { strings } from '@angular-devkit/core';
+import {
+  Rule,
+  Tree,
+  chain,
+  apply,
+  url,
+  template,
+  mergeWith,
+} from '@angular-devkit/schematics';
+
+function generateComponentOptions(
+  name: string,
+): { name: string; package: string } {
+  return {
+    name: `Dt${strings.classify(name)}Module`,
+    package: `@dynatrace/barista-components/${strings.dasherize(name)}`,
+  };
+}
+
+function generateE2EComponentOptions(
+  name: string,
+): { component: string; module: string } {
+  return {
+    component: `DtE2E${strings.classify(name)}`,
+    module: `DtE2E${strings.classify(name)}Module`,
+  };
+}
+
+// TODO: extract reusable naming functions and move to utils
 
 export default function (options: DtComponentE2EOptions): Rule {
   return async (_host: Tree) => {
-    console.log(options);
+    const extendedOptions = {
+      ...options,
+      selector: `dt-${strings.dasherize(options.name)}`,
+      componentModule: generateComponentOptions(options.name),
+      e2eComponent: generateE2EComponentOptions(options.name),
+    };
 
-    return chain([noop()]);
+    console.log(extendedOptions);
+
+    const templateSource = apply(url('./files'), [
+      template({
+        ...strings,
+        ...extendedOptions,
+      }),
+    ]);
+
+    return chain([mergeWith(templateSource)]);
   };
 }

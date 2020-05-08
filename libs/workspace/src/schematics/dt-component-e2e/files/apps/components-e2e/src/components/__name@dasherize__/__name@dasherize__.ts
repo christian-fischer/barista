@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-export interface DtComponentE2EOptions {
-  name: string;
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'dt-e2e-<%= dasherize(name) %>',
+  templateUrl: '<%= dasherize(name) %>.html',
+})
+export class <%= e2eComponent.component %> {
+
 }

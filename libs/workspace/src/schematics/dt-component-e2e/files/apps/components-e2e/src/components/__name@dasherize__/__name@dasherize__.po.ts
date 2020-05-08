@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export interface DtComponentE2EOptions {
-  name: string;
-}
+import { Selector } from 'testcafe';
+
+export const <%= camelize(name) %> = Selector('#test-<%= dasherize(name) %>');
