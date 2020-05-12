@@ -24,9 +24,12 @@ $top-bar-margin-bottom: 12px;
   width: 100%;
   height: 100%;
   font-family: 'Roboto', sans-serif;
-  // TODO: replace with design tokens
-  background-color: $gray-900;
-  background: linear-gradient(90deg, $gray-860 0%, $gray-900 20%);
+  background-color: $fluid-color-abyss-neutral-50;
+  background: linear-gradient(
+    90deg,
+    $fluid-color-abyss-neutral-70 0%,
+    $fluid-color-abyss-neutral-50 20%
+  );
 }
 
 .design-tokens-ui-top-bar {
@@ -47,9 +50,4 @@ $top-bar-margin-bottom: 12px;
   height: calc(
     100vh - #{$top-bar-navigation-height} - #{$top-bar-margin-bottom}
   );
-}
-
-.dt-button.dt-button-secondary:hover {
-  // TODO: replace with design tokens
-  background-color: $gray-800;
 }

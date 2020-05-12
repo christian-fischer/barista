@@ -18,8 +18,8 @@
 
 .design-tokens-ui-input {
   --color: #{$light-background};
-  --color-line-unfocused: #{$fluid-color-neutral--base};
-  --color-line-invalid: #{$fluid-color-negative--light};
+  --color-line-unfocused: #{$fluid-color-abyss-neutral-100};
+  --color-line-invalid: #{$fluid-color-abyss-error-100};
 
   height: 32px;
   background: transparent;
