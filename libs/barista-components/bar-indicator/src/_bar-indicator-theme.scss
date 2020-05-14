@@ -1,20 +1,17 @@
-@import '../../core/src/theming/theming';
+:host.dt-color-main {
+  .dt-bar-indicator-bar {
+    background-color: var(--dt-bar-indicator-default-color);
+  }
+}
 
-@mixin dt-theme-bar-indicator($theme) {
-  $palette-names: 'main', 'recovered', 'error';
-  $default-palette: 'main';
+:host.dt-color-error {
+  .dt-bar-indicator-bar {
+    background-color: var(--dt-error-default-color);
+  }
+}
 
-  @each $name in $palette-names {
-    $palette: dt-get-theme-palette($theme, $name);
-    $default-color: dt-get-theme-color($palette, 'default');
-
-    $namespace: ':host';
-    @if $name != $default-palette {
-      $namespace: ':host.dt-color-#{$name}';
-    }
-
-    #{$namespace} .dt-bar-indicator-bar {
-      background-color: $default-color;
-    }
+:host.dt-color-recovered {
+  .dt-bar-indicator-bar {
+    background-color: var(--dt-bar-indicator-recovered-color);
   }
 }
