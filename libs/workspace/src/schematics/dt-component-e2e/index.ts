@@ -64,7 +64,7 @@ function generateE2EComponentOptions(
 /**
  * Adds a new route inside the ui-test routes
  */
-function addRoute(options: DtE2EExtendedOptions): Rule {
+export function addRoute(options: DtE2EExtendedOptions): Rule {
   return (host: Tree) => {
     const modulePath = join(
       'apps',
@@ -117,7 +117,7 @@ export default function (options: DtComponentE2EOptions): Rule {
       e2eComponent: generateE2EComponentOptions(options.name),
     };
 
-    console.log(extendedOptions);
+    // console.log(extendedOptions);
 
     const templateSource = apply(url('./files'), [
       template({
@@ -127,5 +127,6 @@ export default function (options: DtComponentE2EOptions): Rule {
     ]);
 
     return chain([mergeWith(templateSource), addRoute(extendedOptions)]);
+    // return mergeWith(templateSource);
   };
 }

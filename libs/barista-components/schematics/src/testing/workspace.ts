@@ -21,8 +21,11 @@ import {
   Style,
 } from '@schematics/angular/application/schema';
 import { Schema as WorkspaceOptions } from '@schematics/angular/workspace/schema';
-import { addFixtureToTree } from '.';
+import { addFixtureToTree } from '@dynatrace/testing/fixtures';
 import { runExternalSchematic } from './run-schematic';
+import { join } from 'path';
+
+const fixturePath: string = join(__dirname, '../fixtures');
 
 export async function createWorkspace(tree?: Tree): Promise<UnitTestTree> {
   let workTree: UnitTestTree;
@@ -55,25 +58,28 @@ export async function createWorkspace(tree?: Tree): Promise<UnitTestTree> {
     workTree,
   );
 
-  await addFixtureToTree(
-    workTree,
-    'barista-components-package.json',
-    'node_modules/@dynatrace/barista-components/package.json',
-  );
+  await addFixtureToTree({
+    tree: workTree,
+    source: 'barista-components-package.json',
+    destination: 'node_modules/@dynatrace/barista-components/package.json',
+    fixturePath,
+  });
 
   return workTree;
 }
 
 export async function addLegacyComponents(tree: UnitTestTree): Promise<void> {
-  await addFixtureToTree(
-    tree,
-    'package-simple-migration.json',
-    '/package.json',
-  );
+  await addFixtureToTree({
+    tree: tree,
+    source: 'package-simple-migration.json',
+    destination: '/package.json',
+    fixturePath,
+  });
 
-  await addFixtureToTree(
-    tree,
-    'exisiting-legacy-angular.json',
-    '/angular.json',
-  );
+  await addFixtureToTree({
+    tree: tree,
+    source: 'exisiting-legacy-angular.json',
+    destination: '/angular.json',
+    fixturePath,
+  });
 }

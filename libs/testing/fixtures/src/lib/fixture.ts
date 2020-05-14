@@ -18,22 +18,32 @@ import { Tree } from '@angular-devkit/schematics/src/tree/interface';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
-export async function getFixture(filePath: string): Promise<string> {
-  const fixturesFolder = join(__dirname, '../fixtures');
-  return fs.readFile(join(fixturesFolder, filePath), {
+export async function getFixture(
+  filePath: string,
+  fixturePath: string,
+): Promise<string> {
+  return fs.readFile(join(fixturePath, filePath), {
     encoding: 'utf-8',
   });
 }
 
-export async function addFixtureToTree(
-  tree: Tree,
-  source: string,
-  destination: string,
-): Promise<void> {
-  const content = await getFixture(source);
+export async function addFixtureToTree({
+  tree,
+  source,
+  destination,
+  fixturePath,
+}: FixtureAdditionParam): Promise<void> {
+  const content = await getFixture(source, fixturePath);
   if (tree.exists(destination)) {
     tree.overwrite(destination, content);
     return;
   }
   tree.create(destination, content);
 }
+
+export type FixtureAdditionParam = {
+  tree: Tree;
+  source: string;
+  destination: string;
+  fixturePath: string;
+};

@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-import { noop, Tree, externalSchematic } from '@angular-devkit/schematics';
-import { UnitTestTree } from '@angular-devkit/schematics/testing';
-import {
-  addFixtureToTree,
-  addLegacyComponents,
-  createWorkspace,
-  runSchematic,
-} from '../testing';
-import { readFileFromTree, readJsonFromTree } from '../utils';
-import { Schema } from './schema';
+import { externalSchematic, noop, Tree } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
-import {
-  COULD_NOT_FIND_PROJECT_ERROR,
-  COULD_NOT_FIND_DEFAULT_PROJECT_ERROR,
-} from './rules';
+import { UnitTestTree } from '@angular-devkit/schematics/testing';
+import { addFixtureToTree } from '@dynatrace/testing/fixtures';
+import { addLegacyComponents, createWorkspace, runSchematic } from '../testing';
+import { readFileFromTree, readJsonFromTree } from '../utils';
 // use glob import for mocking
-// tslint:disable-next-line: no-duplicate-imports
 import * as rules from './rules';
+import { Schema } from './schema';
+import { join } from 'path';
 
 export async function testNgAdd(
   testTree: Tree,
@@ -49,6 +41,7 @@ export async function testNgAdd(
 }
 
 let tree: UnitTestTree;
+const fixturePath: string = join(__dirname, '../fixtures');
 
 beforeEach(async () => {
   tree = await createWorkspace();
@@ -73,7 +66,7 @@ describe('Migrate existing angular-components to barista components', () => {
     try {
       await testNgAdd(tree);
     } catch (e) {
-      expect(e.message).toBe(COULD_NOT_FIND_DEFAULT_PROJECT_ERROR);
+      expect(e.message).toBe(rules.COULD_NOT_FIND_DEFAULT_PROJECT_ERROR);
     } finally {
       expect.assertions(1);
     }
@@ -103,26 +96,38 @@ describe('Migrate existing angular-components to barista components', () => {
   });
 
   it('should add barista icons to the angular.json', async () => {
-    await addFixtureToTree(
+    await addFixtureToTree({
       tree,
-      'package-animations-existing.json',
-      '/package.json',
-    );
+      source: 'package-animations-existing.json',
+      destination: '/package.json',
+      fixturePath,
+    });
 
-    await addFixtureToTree(tree, 'angular-simple.json', '/angular.json');
+    await addFixtureToTree({
+      tree,
+      source: 'angular-simple.json',
+      destination: '/angular.json',
+      fixturePath,
+    });
     await testNgAdd(tree, { project: 'myapp' });
 
     expect(readJsonFromTree(tree, '/angular.json')).toMatchSnapshot();
   });
 
   it('should include main.scss in angular.json, when typography is set to false ', async () => {
-    await addFixtureToTree(
+    await addFixtureToTree({
       tree,
-      'package-animations-existing.json',
-      '/package.json',
-    );
+      source: 'package-animations-existing.json',
+      destination: '/package.json',
+      fixturePath,
+    });
 
-    await addFixtureToTree(tree, 'angular-simple.json', '/angular.json');
+    await addFixtureToTree({
+      tree,
+      source: 'angular-simple.json',
+      destination: '/angular.json',
+      fixturePath,
+    });
     await testNgAdd(tree, { project: 'myapp', typography: false });
 
     expect(
@@ -132,17 +137,19 @@ describe('Migrate existing angular-components to barista components', () => {
   });
 
   it('should add styles correctly even if there is no styles array in the angular.json ', async () => {
-    await addFixtureToTree(
+    await addFixtureToTree({
       tree,
-      'package-animations-existing.json',
-      '/package.json',
-    );
+      source: 'package-animations-existing.json',
+      destination: '/package.json',
+      fixturePath,
+    });
 
-    await addFixtureToTree(
+    await addFixtureToTree({
       tree,
-      'angular-without-styles.json',
-      '/angular.json',
-    );
+      source: 'angular-without-styles.json',
+      destination: '/angular.json',
+      fixturePath,
+    });
     await testNgAdd(tree, { project: 'myapp' });
 
     expect(readJsonFromTree(tree, '/angular.json')).toMatchSnapshot();
@@ -185,7 +192,12 @@ describe('New workspace', () => {
   });
 
   it('should add import the No operation animations module from angular when animations is set to false', async () => {
-    await addFixtureToTree(tree, 'package-empty.json', '/package.json');
+    await addFixtureToTree({
+      tree,
+      source: 'package-empty.json',
+      destination: '/package.json',
+      fixturePath,
+    });
     await testNgAdd(tree, {
       animations: false,
       project: 'myapp',
@@ -197,17 +209,23 @@ describe('New workspace', () => {
   });
 
   it('should add the `@angular/animations` package with the same version as the `@angular/core` package when specified', async () => {
-    await addFixtureToTree(tree, 'package-empty.json', '/package.json');
+    await addFixtureToTree({
+      tree,
+      source: 'package-empty.json',
+      destination: '/package.json',
+      fixturePath,
+    });
     await testNgAdd(tree, { project: undefined });
     expect(readJsonFromTree(tree, '/package.json')).toMatchSnapshot();
   });
 
   it("shouldn't add @angular/animations` package if already installed", async () => {
-    await addFixtureToTree(
+    await addFixtureToTree({
       tree,
-      'package-animations-existing.json',
-      '/package.json',
-    );
+      source: 'package-animations-existing.json',
+      destination: '/package.json',
+      fixturePath,
+    });
 
     await testNgAdd(tree, { animations: true, project: undefined });
 
@@ -219,7 +237,12 @@ describe('New workspace', () => {
   });
 
   it('should add @angular/platform-browser-dynamic', async () => {
-    await addFixtureToTree(tree, 'package-empty.json', '/package.json');
+    await addFixtureToTree({
+      tree,
+      source: 'package-empty.json',
+      destination: '/package.json',
+      fixturePath,
+    });
 
     expect(readFileFromTree(tree, '/package.json')).not.toMatch(
       '@angular/platform-browser-dynamic',
@@ -246,7 +269,7 @@ describe('New workspace', () => {
     try {
       await testNgAdd(tree, { project: 'asdf' });
     } catch (e) {
-      expect(e.message).toBe(COULD_NOT_FIND_PROJECT_ERROR('asdf'));
+      expect(e.message).toBe(rules.COULD_NOT_FIND_PROJECT_ERROR('asdf'));
     } finally {
       expect.assertions(1);
     }
