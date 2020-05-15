@@ -1,17 +1,15 @@
 :host.dt-color-main {
-  .dt-bar-indicator-bar {
-    background-color: var(--dt-bar-indicator-default-color);
-  }
+  --dt-bar-indicator-background-color: var(--dt-theme-main-default-color);
 }
 
 :host.dt-color-error {
-  .dt-bar-indicator-bar {
-    background-color: var(--dt-error-default-color);
-  }
+  --dt-bar-indicator-background-color: var(--dt-error-default-color);
 }
 
 :host.dt-color-recovered {
-  .dt-bar-indicator-bar {
-    background-color: var(--dt-bar-indicator-recovered-color);
-  }
+  --dt-bar-indicator-background-color: var(--dt-recovered-default-color);
+}
+
+:host .dt-bar-indicator-bar {
+  background-color: var(--dt-bar-indicator-background-color);
 }
